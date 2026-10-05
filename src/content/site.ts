@@ -10,7 +10,7 @@ export const site = {
   /** Cal.com (or any booking) link. Leave empty to hide every "Book a call" button. */
   booking: 'https://cal.com/ansaleh/intro-call',
   /** GoatCounter code, e.g. 'ansaleh' for ansaleh.goatcounter.com. Leave empty to turn analytics off. */
-  goatcounter: '',
+  goatcounter: 'ahmadsaleh',
   /** Shown in the bar that appears after scrolling. */
   availability: 'Open to remote roles and relocation',
   /** The at-a-glance line under the intro. */
