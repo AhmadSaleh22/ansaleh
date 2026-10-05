@@ -7,6 +7,10 @@ export const site = {
   linkedin: 'https://www.linkedin.com/in/ahmadnsaleh',
   /** PDF in public/. Replace the file to update the CV everywhere. */
   cv: '/Ahmad-Saleh-CV.pdf',
+  /** Cal.com (or any booking) link. Leave empty to hide every "Book a call" button. */
+  booking: '',
+  /** GoatCounter code, e.g. 'ansaleh' for ansaleh.goatcounter.com. Leave empty to turn analytics off. */
+  goatcounter: '',
   /** Shown in the bar that appears after scrolling. */
   availability: 'Open to remote roles and relocation',
   /** The at-a-glance line under the intro. */

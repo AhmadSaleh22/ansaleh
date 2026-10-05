@@ -26,6 +26,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Netlify reads this hidden form at deploy time so the Ask dialog can post to it. Keep the field names in sync with Ask.tsx. -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="name" />
+      <input name="email" />
+      <input name="intent" />
+      <input name="topic" />
+      <input name="quote" />
+      <input name="image" />
+      <input name="page" />
+      <textarea name="message"></textarea>
+    </form>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

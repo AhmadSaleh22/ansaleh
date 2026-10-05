@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { site } from '../content/site'
+import { track } from '../lib/track'
 
 /**
  * "Ask about this": select any text on the site (or press an Ask button) and send
- * Ahmad a message about it. Sending opens the visitor's email app with everything
- * filled in, so nothing goes through a server.
+ * Ahmad a message about it. Messages go through Netlify Forms (the hidden "contact"
+ * form in index.html); the visitor's email app is the fallback if that fails.
  */
 
 export type AskDetail = { quote?: string; topic?: string; image?: string; intent?: IntentId }
@@ -46,7 +47,10 @@ export function AskLayer() {
   const [intent, setIntent] = useState<IntentId>('hiring')
   const [name, setName] = useState('')
   const [message, setMessage] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [email, setEmail] = useState('')
+  const [bot, setBot] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [emailError, setEmailError] = useState(false)
   const textarea = useRef<HTMLTextAreaElement>(null)
   const [chip, setChip] = useState<null | { x: number; y: number; topic: string; image?: string }>(null)
   const chipEl = useRef<HTMLButtonElement>(null)
@@ -115,7 +119,8 @@ export function AskLayer() {
   const openWith = useCallback((detail: AskDetail) => {
     setPill(null)
     setChip(null)
-    setCopied(false)
+    setStatus('idle')
+    setEmailError(false)
     if (detail.intent) setIntent(detail.intent)
     setOpen(detail)
   }, [])
@@ -156,16 +161,38 @@ export function AskLayer() {
       .join('\n')
       .trim()
 
-  const send = () => {
-    const subject = open?.topic ? `${current.subject}: ${open.topic}` : current.subject
-    window.location.href = `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body())}`
-  }
-  const copy = async () => {
+  const subject = () => (open?.topic ? `${current.subject}: ${open.topic}` : current.subject)
+  const mailto = () => `mailto:${site.email}?subject=${encodeURIComponent(subject())}&body=${encodeURIComponent(body())}`
+
+  const send = async () => {
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+    setEmailError(!validEmail)
+    if (!validEmail) return
+    setStatus('sending')
+    const fields: Record<string, string> = {
+      'form-name': 'contact',
+      'bot-field': bot,
+      name: name.trim(),
+      email: email.trim(),
+      intent: current.label,
+      topic: open?.topic ?? '',
+      quote: open?.quote ?? '',
+      image: open?.image ?? '',
+      page: window.location.href,
+      message: message.trim() || '(No message, just wants to talk.)',
+    }
     try {
-      await navigator.clipboard.writeText(`To: ${site.email}\n\n${body()}`)
-      setCopied(true)
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(fields).toString(),
+      })
+      if (!res.ok) throw new Error(String(res.status))
+      setStatus('sent')
+      track('contact-sent')
+      setMessage('')
     } catch {
-      setCopied(false)
+      setStatus('error')
     }
   }
 
@@ -251,50 +278,104 @@ export function AskLayer() {
                 <p className="ask-quote">{open.topic}</p>
               ) : null}
 
-              <fieldset className="mt-5">
-                <legend className="text-muted">What is this about?</legend>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {intents.map((i) => (
-                    <button
-                      key={i.id}
-                      type="button"
-                      className="ask-chip press"
-                      aria-pressed={intent === i.id}
-                      onClick={() => setIntent(i.id)}
-                    >
-                      {i.label}
+              {status === 'sent' ? (
+                <div className="mt-5" role="status">
+                  <p className="font-medium">Thanks, your message is on its way.</p>
+                  <p className="mt-1 text-muted">I’ll reply to {email.trim()}.</p>
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
+                    {site.booking && (
+                      <a href={site.booking} target="_blank" rel="noopener noreferrer" className="ask-send press" onClick={() => track('booking-click')}>
+                        Book a call too
+                      </a>
+                    )}
+                    <button type="button" className="link text-muted" onClick={() => setOpen(null)}>
+                      Close
                     </button>
-                  ))}
+                  </div>
                 </div>
-              </fieldset>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    void send()
+                  }}
+                >
+                  <fieldset className="mt-5">
+                    <legend className="text-muted">What is this about?</legend>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {intents.map((i) => (
+                        <button
+                          key={i.id}
+                          type="button"
+                          className="ask-chip press"
+                          aria-pressed={intent === i.id}
+                          onClick={() => setIntent(i.id)}
+                        >
+                          {i.label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
 
-              <label className="mt-5 block">
-                <span className="text-muted">Message</span>
-                <textarea
-                  ref={textarea}
-                  rows={4}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="What would you like to know, or what are you working on?"
-                  className="ask-field"
-                />
-              </label>
-              <label className="mt-3 block">
-                <span className="text-muted">Your name and company (optional)</span>
-                <input value={name} onChange={(e) => setName(e.target.value)} className="ask-field" />
-              </label>
+                  <label className="mt-5 block">
+                    <span className="text-muted">Message</span>
+                    <textarea
+                      ref={textarea}
+                      rows={4}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="What would you like to know, or what are you working on?"
+                      className="ask-field"
+                    />
+                  </label>
+                  <label className="mt-3 block">
+                    <span className="text-muted">Your email, so I can reply</span>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        setEmailError(false)
+                      }}
+                      aria-invalid={emailError || undefined}
+                      aria-describedby={emailError ? 'ask-email-error' : undefined}
+                      className="ask-field"
+                    />
+                    {emailError && (
+                      <span id="ask-email-error" className="mt-1 block text-[12px] text-accent">
+                        Add an email address so I can get back to you.
+                      </span>
+                    )}
+                  </label>
+                  <label className="mt-3 block">
+                    <span className="text-muted">Your name and company (optional)</span>
+                    <input autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} className="ask-field" />
+                  </label>
+                  <label className="ask-honeypot" aria-hidden>
+                    Leave this empty
+                    <input tabIndex={-1} autoComplete="off" value={bot} onChange={(e) => setBot(e.target.value)} />
+                  </label>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" className="ask-send press" onClick={send}>
-                  Write the email
-                </button>
-                <button type="button" className="link text-muted" onClick={copy}>
-                  {copied ? 'Copied' : 'Copy instead'}
-                </button>
-              </div>
-              <p className="mt-3 text-[12px] text-muted">
-                Opens your email app addressed to {site.email}, with what you picked and this page included.
-              </p>
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
+                    <button type="submit" className="ask-send press" disabled={status === 'sending'}>
+                      {status === 'sending' ? 'Sending…' : 'Send message'}
+                    </button>
+                    <a className="link text-muted" href={mailto()}>
+                      Use your email app instead
+                    </a>
+                  </div>
+                  {status === 'error' ? (
+                    <p className="mt-3 text-[12px] text-accent" role="alert">
+                      That didn’t go through. Use your email app instead, or write to {site.email}.
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-[12px] text-muted">
+                      Goes straight to me, with what you picked and this page included. Your email is only used to reply.
+                    </p>
+                  )}
+                </form>
+              )}
             </motion.div>
           </motion.div>
         )}

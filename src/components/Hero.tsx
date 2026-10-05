@@ -6,6 +6,7 @@ import { projects } from '../content/projects'
 import { work } from '../lib/content'
 import { Diagram, type DiagramName } from './Diagrams'
 import { ask } from './Ask'
+import { track } from '../lib/track'
 
 type Media = { image?: string; diagram?: DiagramName }
 
@@ -139,8 +140,13 @@ export function Hero() {
       </ul>
 
       <div className="flex flex-wrap items-center gap-2 pt-6">
-        <a href={site.cv} download className="btn btn--primary press">Download CV</a>
+        <a href={site.cv} download className="btn btn--primary press" onClick={() => track('cv-download')}>Download CV</a>
         <button type="button" className="btn press" onClick={() => ask({ intent: 'hiring' })}>Let’s talk</button>
+        {site.booking && (
+          <a href={site.booking} target="_blank" rel="noopener noreferrer" className="btn press" onClick={() => track('booking-click')}>
+            Book a call
+          </a>
+        )}
       </div>
 
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-6 text-muted">

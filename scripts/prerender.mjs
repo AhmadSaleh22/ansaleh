@@ -53,6 +53,8 @@ function experience() {
 
 const escape = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const abs = (path) => (SITE_URL ? SITE_URL + path : path)
+/** Netlify serves dist/<route>/index.html at /<route>/, so links and the sitemap use the trailing slash. */
+const pretty = (path) => (path === '/' ? '/' : `${path}/`)
 
 function page({ path, title, description, image = '/og.png', type = 'website' }) {
   const fullTitle = title ? `${title} · ${NAME}` : `${NAME} · Software Engineer`
@@ -62,11 +64,11 @@ function page({ path, title, description, image = '/og.png', type = 'website' })
   }
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escape(fullTitle)}</title>`)
   set(/(<meta name="description" content=")([^"]*)(")/, description)
-  set(/(<link rel="canonical" href=")([^"]*)(")/, abs(path))
+  set(/(<link rel="canonical" href=")([^"]*)(")/, abs(pretty(path)))
   set(/(<meta property="og:type" content=")([^"]*)(")/, type)
   set(/(<meta property="og:title" content=")([^"]*)(")/, fullTitle)
   set(/(<meta property="og:description" content=")([^"]*)(")/, description)
-  set(/(<meta property="og:url" content=")([^"]*)(")/, abs(path))
+  set(/(<meta property="og:url" content=")([^"]*)(")/, abs(pretty(path)))
   set(/(<meta property="og:image" content=")([^"]*)(")/, abs(image))
   set(/(<meta name="twitter:title" content=")([^"]*)(")/, fullTitle)
   set(/(<meta name="twitter:description" content=")([^"]*)(")/, description)
@@ -100,6 +102,16 @@ for (const n of markdown('notes')) {
 }
 for (const b of markdown('books')) {
   written.push(page({ path: `/library/${b.slug}`, title: b.title, description: `Notes on ${b.title} by ${b.author}.`, image: b.cover || '/og.png', type: 'article' }))
+}
+
+// sitemap.xml and robots.txt, so search engines find every page. They need absolute URLs.
+if (SITE_URL) {
+  const today = new Date().toISOString().slice(0, 10)
+  const urls = written
+    .map((path) => `  <url><loc>${SITE_URL}${pretty(path)}</loc><lastmod>${today}</lastmod></url>`)
+    .join('\n')
+  writeFileSync(join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`)
+  writeFileSync(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`)
 }
 
 console.log(`prerender: wrote ${written.length} pages${SITE_URL ? ` for ${SITE_URL}` : ' (relative URLs; set SITE_URL for link previews)'}`)

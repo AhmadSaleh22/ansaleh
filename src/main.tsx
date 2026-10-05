@@ -5,6 +5,9 @@ import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { NotFound } from './pages/NotFound'
 import './styles/global.css'
+import { loadAnalytics } from './lib/track'
+
+loadAnalytics()
 
 // Without the View Transitions API, routes fade in with CSS instead.
 if (typeof (document as Document & { startViewTransition?: unknown }).startViewTransition !== 'function') document.documentElement.classList.add('no-vt')

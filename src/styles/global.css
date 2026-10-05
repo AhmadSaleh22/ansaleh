@@ -579,3 +579,8 @@ html.no-vt .route { animation: vt-in 200ms ease both; }
 .hand-page .prose ul { list-style: "–  "; }
 .hand-page .prose code { font-size: 15px; }
 .note-summary.note-summary { font-family: "Caveat", var(--font-sans); font-size: 20px; line-height: 1.2; color: var(--ink); padding-top: 3px; }
+
+/* Contact form: honeypot field hidden from people, visible to bots */
+.ask-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0; }
+.ask-send:disabled { opacity: 0.6; cursor: progress; }
+a.ask-send { display: inline-flex; align-items: center; text-decoration: none; }

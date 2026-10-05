@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { site } from '../content/site'
 import { ask } from './Ask'
+import { track } from '../lib/track'
 
 const KEY = 'availability-bar-dismissed'
 
@@ -56,7 +57,7 @@ export function AvailabilityBar() {
         >
           <span className="status-dot" data-live aria-hidden />
           <span>{site.availability}</span>
-          <a href={site.cv} download className="avail-link">CV</a>
+          <a href={site.cv} download className="avail-link" onClick={() => track('cv-download')}>CV</a>
           <button type="button" className="avail-cta press" onClick={() => ask({ intent: 'hiring' })}>
             Let’s talk
           </button>
