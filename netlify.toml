@@ -1,0 +1,9 @@
+# Netlify build settings. The site builds with `npm run build` and serves the dist folder.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Used by scripts/prerender.mjs for absolute links in social previews.
+  SITE_URL = "https://ansaleh.com"
