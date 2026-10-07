@@ -6,7 +6,8 @@ role: Frontend Lead
 period: Apr 2025 to Sep 2026
 figure: −50%
 figureLabel: planning time across 10 plants
-cover:
+cover: /work/syntax-3d-poster.jpg
+video: /work/syntax-3d.mp4
 diagram: planning
 ---
 

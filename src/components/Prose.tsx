@@ -16,11 +16,11 @@ export function Prose({ children }: { children: string }) {
             if (only && only.type === 'element' && only.tagName === 'img') return <>{children}</>
             return <p {...rest}>{children}</p>
           },
-          img({ src, alt }) {
+          img({ src, alt, title }) {
             return (
               <figure className="prose-figure">
                 {isVideo(src) ? (
-                  <video src={src} aria-label={alt} muted loop playsInline controls preload="metadata" />
+                  <video src={src} poster={title} aria-label={alt} muted loop playsInline controls preload="metadata" />
                 ) : (
                   <img src={src} alt={alt ?? ''} loading="lazy" decoding="async" />
                 )}

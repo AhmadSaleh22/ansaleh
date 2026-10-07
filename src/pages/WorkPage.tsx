@@ -12,7 +12,12 @@ export function WorkPage() {
   const item = work[index]
   useTitle(item?.title)
   if (!item) return <Navigate to="/404" replace />
-  const media = item.video ? `![](${item.video})` : item.cover ? `![](${item.cover})` : ''
+  // A video carries its cover as the markdown title, so Prose can use it as the poster.
+  const media = item.video
+    ? `![](${item.video}${item.cover ? ` "${item.cover}"` : ''})`
+    : item.cover
+      ? `![](${item.cover})`
+      : ''
   return (
     <ArticleShell
       meta={`Case study #${index + 1} · ${item.period}`}
