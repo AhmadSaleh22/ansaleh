@@ -128,7 +128,7 @@ export function Hero() {
 
       <p className="max-w-[520px] pt-10 text-pretty">
         I build web and mobile products for payroll, healthcare and manufacturing. Most recently I led frontend at{' '}
-        <PreviewLink to="/experience/syntax" media={mediaForWork('syntax')}>Syntax</PreviewLink>. Before that I worked on{' '}
+        <PreviewLink to="/experience/syntax" media={mediaForWork('syntax')}>Syntax</PreviewLink> and built its 3D plant floor in Three.js. Before that I worked on{' '}
         <PreviewLink to="/experience/marham-care" media={mediaForWork('marham')}>Marham Care</PreviewLink> and built a payroll ERP at{' '}
         <PreviewLink to="/experience/eddekhar" media={mediaForWork('eddekhar')}>Eddekhar</PreviewLink>.
       </p>
