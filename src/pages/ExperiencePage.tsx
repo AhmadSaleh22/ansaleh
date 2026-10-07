@@ -19,6 +19,21 @@ export function ExperiencePage() {
     <ArticleShell meta={role.period} title={role.company} byline={`${role.role} · ${role.type} · ${role.location}`} back="/#experience">
       <div className="prose">
         <p>{role.summary}</p>
+        {/* When the role's case study has a video, it plays here too, with the case study's cover as its poster. */}
+        {story?.video && (
+          <figure className="prose-figure">
+            <video
+              src={story.video}
+              poster={story.cover}
+              aria-label={`${role.company} product video`}
+              muted
+              loop
+              playsInline
+              controls
+              preload="metadata"
+            />
+          </figure>
+        )}
         <h2>What I did</h2>
         <ul>
           {role.highlights.map((h) => (
