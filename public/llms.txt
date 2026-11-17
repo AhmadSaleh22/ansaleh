@@ -1,0 +1,13 @@
+# Ahmad Saleh
+
+> Senior software engineer in Cairo (UTC+3) with 5+ years building production web platforms in React, TypeScript, Node.js and Python on AWS and GCP, including real-time 3D industrial visualization. Open to full-time roles (remote or relocation) and consulting.
+
+## Key pages
+- [Hire / consulting](https://ansaleh.com/hire/): ways to work together, strengths and proof
+- [Home and bio](https://ansaleh.com/): about, experience, projects
+- [Syntax case study](https://ansaleh.com/work/syntax/): production planning, 3D plant floor, -50% planning time across 10 plants
+- [CV (PDF)](https://ansaleh.com/Ahmad-Saleh-CV.pdf)
+
+## Profiles
+- LinkedIn: https://www.linkedin.com/in/ahmadnsaleh/
+- GitHub: https://github.com/AhmadSaleh22/

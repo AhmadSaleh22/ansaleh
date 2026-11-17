@@ -56,8 +56,8 @@ const abs = (path) => (SITE_URL ? SITE_URL + path : path)
 /** Netlify serves dist/<route>/index.html at /<route>/, so links and the sitemap use the trailing slash. */
 const pretty = (path) => (path === '/' ? '/' : `${path}/`)
 
-function page({ path, title, description, image = '/og.png', type = 'website' }) {
-  const fullTitle = title ? `${title} · ${NAME}` : `${NAME} · Software Engineer`
+function page({ path, title, description, image = '/og.png', type = 'website', jsonLd }) {
+  const fullTitle = title ? `${title} · ${NAME}` : `${NAME} · Senior Software Engineer & Consultant`
   let html = template
   const set = (re, value) => {
     html = html.replace(re, (_m, before, _old, after) => `${before}${escape(value)}${after}`)
@@ -73,6 +73,7 @@ function page({ path, title, description, image = '/og.png', type = 'website' })
   set(/(<meta name="twitter:title" content=")([^"]*)(")/, fullTitle)
   set(/(<meta name="twitter:description" content=")([^"]*)(")/, description)
   set(/(<meta name="twitter:image" content=")([^"]*)(")/, abs(image))
+  if (jsonLd) html = html.replace('</head>', `    <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>\n  </head>`)
   const file = path === '/' ? join(dist, 'index.html') : join(dist, path.slice(1), 'index.html')
   mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, html)
@@ -80,7 +81,53 @@ function page({ path, title, description, image = '/og.png', type = 'website' })
 }
 
 const defaultDescription = /<meta name="description" content="([^"]*)"/.exec(template)?.[1] ?? ''
-const written = [page({ path: '/', description: defaultDescription })]
+// Structured data for the home page, so Google can connect the name, site, LinkedIn and GitHub.
+const homeJsonLd = SITE_URL
+  ? {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Person',
+          '@id': `${SITE_URL}/#person`,
+          name: NAME,
+          url: `${SITE_URL}/`,
+          image: `${SITE_URL}/og.png`,
+          jobTitle: 'Senior Software Engineer',
+          description: defaultDescription,
+          address: { '@type': 'PostalAddress', addressLocality: 'Cairo', addressCountry: 'EG' },
+          knowsAbout: ['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Google Cloud', '3D web visualization', 'Software consulting'],
+          sameAs: ['https://www.linkedin.com/in/ahmadnsaleh/', 'https://github.com/AhmadSaleh22/'],
+        },
+        { '@type': 'WebSite', '@id': `${SITE_URL}/#website`, url: `${SITE_URL}/`, name: NAME, publisher: { '@id': `${SITE_URL}/#person` } },
+        {
+          '@type': 'ProfilePage',
+          url: `${SITE_URL}/`,
+          mainEntity: { '@id': `${SITE_URL}/#person` },
+        },
+      ],
+    }
+  : undefined
+const written = [page({ path: '/', description: defaultDescription, jsonLd: homeJsonLd })]
+
+written.push(
+  page({
+    path: '/hire',
+    title: 'Hire a senior software engineer or consultant',
+    description:
+      'Hire Ahmad Saleh, a senior software engineer in Cairo: React, TypeScript, Node.js, Python, AWS, GCP and 3D industrial visualization. Open to full-time roles and consulting.',
+    jsonLd: SITE_URL && {
+      '@context': 'https://schema.org',
+      '@type': 'ProfessionalService',
+      '@id': `${SITE_URL}/hire/#service`,
+      name: `${NAME}, software engineering and consulting`,
+      url: `${SITE_URL}/hire/`,
+      provider: { '@id': `${SITE_URL}/#person` },
+      areaServed: 'Worldwide',
+      serviceType: ['Software engineering', 'Web application development', 'Engineering consulting', 'CI/CD and release quality'],
+      email: 'dev.ahmadsaleh@gmail.com',
+    },
+  }),
+)
 
 for (const w of markdown('work')) {
   const result = [w.figure, w.figureLabel].filter(Boolean).join(' ')

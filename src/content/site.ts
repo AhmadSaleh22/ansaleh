@@ -1,6 +1,6 @@
 export const site = {
   name: 'Ahmad Saleh',
-  title: 'Software Engineer',
+  title: 'Senior Software Engineer',
   place: 'Cairo',
   email: 'dev.ahmadsaleh@gmail.com',
   github: 'https://github.com/AhmadSaleh22',
@@ -12,7 +12,7 @@ export const site = {
   /** GoatCounter code, e.g. 'ansaleh' for ansaleh.goatcounter.com. Leave empty to turn analytics off. */
   goatcounter: 'ahmadsaleh',
   /** Shown in the bar that appears after scrolling. */
-  availability: 'Open to remote roles and relocation',
+  availability: 'Open to full-time roles and consulting',
   /** The at-a-glance line under the intro. */
   glance: ['5+ years', 'React, TypeScript, Node.js, Python', 'AWS & GCP', 'Cairo (UTC+3)', 'Remote or relocation'],
   bio: {

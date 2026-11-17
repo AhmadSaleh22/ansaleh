@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
+import { Hire } from './pages/Hire'
 import { NotFound } from './pages/NotFound'
 import './styles/global.css'
 import { loadAnalytics } from './lib/track'
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
+      { path: 'hire', element: <Hire /> },
       // Markdown rendering only loads when a case study or note is opened.
       { path: 'work/:slug', lazy: async () => ({ Component: (await import('./pages/WorkPage')).WorkPage }) },
       { path: 'experience/:slug', lazy: async () => ({ Component: (await import('./pages/ExperiencePage')).ExperiencePage }) },

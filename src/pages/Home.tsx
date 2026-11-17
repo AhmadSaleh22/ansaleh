@@ -63,6 +63,7 @@ export function Home() {
       </Section>
 
       <footer className="mt-24 flex flex-wrap gap-x-5 gap-y-1 text-muted">
+        <Link className="link text-fg" to="/hire" viewTransition>Hire me</Link>
         <button type="button" className="link text-fg" onClick={() => ask()}>Work with me</button>
         <a className="link select-all" href={`mailto:${site.email}`}>{site.email}</a>
         <a className="link" href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
